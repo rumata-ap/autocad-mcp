@@ -77,8 +77,12 @@ public static class NetCompat
     {
         if (string.IsNullOrEmpty(path) || !Path.IsPathRooted(path)) return false;
 
-        try { return string.Equals(Path.GetFullPath(path), path, StringComparison.OrdinalIgnoreCase); }
-        catch (Exception) { return false; }
+        // "C:foo" is rooted but drive-relative; .NET treats only "C:\..." as fully qualified.
+        // Forward slashes are legal separators and must not be rejected.
+        if (path.Length >= 2 && path[1] == ':')
+            return path.Length > 2 && (path[2] == '\\' || path[2] == '/');
+
+        return true;
     }
 
     public static Task<byte[]> ReadAllBytesAsync(string path) => Task.Run(() => File.ReadAllBytes(path));
