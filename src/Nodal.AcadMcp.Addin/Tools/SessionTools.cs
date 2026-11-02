@@ -1,5 +1,6 @@
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
+using Nodal.AcadMcp.Contracts;
 using AcApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Nodal.AcadMcp.Addin.Tools;
@@ -22,7 +23,7 @@ internal static class SessionTools
                     acadVersion = SysVar("ACADVER"),
                     product = SysVar("PRODUCT"),
                     loginName = SysVar("LOGINNAME"),
-                    processId = Environment.ProcessId,
+                    processId = NetCompat.ProcessId,
                     acaAvailable = AcaSupport.IsAvailable,
                     bridgePort = HttpBridge.Port,
                     toolCount = Router.List().Count,

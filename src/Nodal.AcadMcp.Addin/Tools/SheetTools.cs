@@ -789,7 +789,7 @@ internal static class SheetTools
         if (v.ValueKind == JsonValueKind.Number)
         {
             var d = v.GetDouble();
-            return d > 0 && double.IsFinite(d) ? d : throw new AcadMcpException("bad_argument", $"Argument '{name}' must be positive.");
+            return d > 0 && NetCompat.IsFinite(d) ? d : throw new AcadMcpException("bad_argument", $"Argument '{name}' must be positive.");
         }
         if (v.ValueKind == JsonValueKind.String)
         {

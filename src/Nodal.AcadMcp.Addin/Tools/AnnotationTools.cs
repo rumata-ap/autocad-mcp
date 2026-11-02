@@ -350,7 +350,7 @@ internal static class AnnotationTools
             var (scope, xrefs, anon, offset, limit) = CommonArgs(e);
             var layerFilter = LayerFilter(e);
             var includeRaw = Args.BoolOpt(e, "includeRaw", false);
-            var maxCells = Math.Clamp(Args.IntOpt(e, "maxCells", DefaultMaxCells), 1, 100_000);
+            var maxCells = NetCompat.Clamp(Args.IntOpt(e, "maxCells", DefaultMaxCells), 1, 100_000);
             var pager = new Pager(offset, limit);
 
             ForEachEntity(ctx, ResolveSpaces(ctx, scope, xrefs, anon), (owner, ent) =>
@@ -593,7 +593,7 @@ internal static class AnnotationTools
             if (scaleWhole) leader.Scale = factor;
 
             if (!string.IsNullOrWhiteSpace(textAngle))
-                leader.TextAngleType = Enum.Parse<TextAngleType>(Sizing(() => AnnotationSizing.TextAngleName(textAngle!)));
+                leader.TextAngleType = (TextAngleType)Enum.Parse(typeof(TextAngleType), Sizing(() => AnnotationSizing.TextAngleName(textAngle!)));
 
             var (first, prepend) = AnnotationSizing.LeaderOrder(arrowPoint, bends);
             var lineIndex = leader.AddLeaderLine(first);
@@ -877,7 +877,7 @@ internal static class AnnotationTools
         var xrefs = Args.BoolOpt(e, "includeXrefs", false);
         var anonymous = Args.BoolOpt(e, "includeAnonymousBlocks", false);
         var offset = Math.Max(0, Args.IntOpt(e, "offset", 0));
-        var limit = Math.Clamp(Args.IntOpt(e, "limit", DefaultLimit), 1, MaxLimit);
+        var limit = NetCompat.Clamp(Args.IntOpt(e, "limit", DefaultLimit), 1, MaxLimit);
         return (scope, xrefs, anonymous, offset, limit);
     }
 

@@ -1,7 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Shared by the net10 server and the in-process add-in. net48 mirrors the CLR
+         AutoCAD 2020 hosts; net10 serves the MCP server. -->
+    <TargetFrameworks>net48;net10.0</TargetFrameworks>
     <AssemblyName>Nodal.AcadMcp.Contracts</AssemblyName>
     <RootNamespace>Nodal.AcadMcp.Contracts</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="PolySharp" Version="1.15.0" PrivateAssets="all" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
 </Project>

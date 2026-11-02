@@ -261,7 +261,7 @@ public static class LispBridge
                 if (string.IsNullOrWhiteSpace(expression))
                     throw new AcadMcpException("bad_argument", "Argument 'expression' must not be empty.");
 
-                var timeout = Math.Clamp(Args.IntOpt(args, "timeoutMs", 15000), 250, 120_000);
+                var timeout = NetCompat.Clamp(Args.IntOpt(args, "timeoutMs", 15000), 250, 120_000);
                 var (value, document, commandLine) = await EvalAsync(expression, timeout).ConfigureAwait(false);
                 return new
                 {

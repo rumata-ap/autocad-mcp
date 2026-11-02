@@ -30,6 +30,8 @@ public sealed class AcadMcpApp : IExtensionApplication
 {
     public void Initialize()
     {
+        // Must run before anything touches System.Text.Json: see AssemblyResolution.
+        AssemblyResolution.Install();
         MainThread.Start();
         ToolRegistry.RegisterAll();
         RibbonSupport.Install();
@@ -89,7 +91,7 @@ public sealed class AcadMcpApp : IExtensionApplication
     {
         Write(HttpBridge.IsRunning
             ? $"\nNodal AcadMcp: listening on port {HttpBridge.Port}, " +
-              $"{Router.List().Count} tools registered, pid {Environment.ProcessId}.\n" + ConnectionNote()
+              $"{Router.List().Count} tools registered, pid {NetCompat.ProcessId}.\n" + ConnectionNote()
             : "\nNodal AcadMcp: stopped. NODALMCPSTART opens the bridge for this session.\n");
     }
 
@@ -107,7 +109,7 @@ public sealed class AcadMcpApp : IExtensionApplication
                $"    MCP client: register {exe} as a stdio server.\n" +
                $"    No MCP tools: {exe} call <tool> @args.json (help for usage), or POST\n" +
                $"    {AcadMcpProtocol.BaseUrl(HttpBridge.Port)}<tool> with header {AcadMcpProtocol.TokenHeader} from\n" +
-               $"    {AcadMcpProtocol.InstanceFile(Environment.ProcessId)}.\n" +
+               $"    {AcadMcpProtocol.InstanceFile(NetCompat.ProcessId)}.\n" +
                $"    GET {AgentGuide.Route} has the working rules. Never drive AutoCAD over COM.\n";
     }
 

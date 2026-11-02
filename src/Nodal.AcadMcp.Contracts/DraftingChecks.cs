@@ -109,7 +109,7 @@ public static class DraftingChecks
     public static double SegmentDistance(Segment2 s, double x, double y)
     {
         double dx = s.X2 - s.X1, dy = s.Y2 - s.Y1, l2 = dx * dx + dy * dy;
-        var t = l2 > 0 ? Math.Clamp(((x - s.X1) * dx + (y - s.Y1) * dy) / l2, 0, 1) : 0;
+        var t = l2 > 0 ? NetCompat.Clamp(((x - s.X1) * dx + (y - s.Y1) * dy) / l2, 0, 1) : 0;
         double px = s.X1 + t * dx - x, py = s.Y1 + t * dy - y;
         return Math.Sqrt(px * px + py * py);
     }

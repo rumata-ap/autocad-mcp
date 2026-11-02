@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Nodal.AcadMcp.Contracts;
 
 namespace Nodal.AcadMcp.Addin.Tools;
 
@@ -841,7 +842,7 @@ internal static class LayoutTools
 
     private static (int Limit, int Offset) Paging(JsonElement e)
     {
-        var limit = Math.Clamp(Args.IntOpt(e, "limit", DefaultLimit), 1, MaxLimit);
+        var limit = NetCompat.Clamp(Args.IntOpt(e, "limit", DefaultLimit), 1, MaxLimit);
         var offset = Math.Max(0, Args.IntOpt(e, "offset", 0));
         return (limit, offset);
     }

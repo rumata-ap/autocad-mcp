@@ -78,7 +78,7 @@ public static class BridgeCli
         switch (verb)
         {
             case "call":
-                if (positional.Count == 0 || positional[0].StartsWith('-') || positional[0].StartsWith('@'))
+                if (positional.Count == 0 || positional[0].StartsWith("-", StringComparison.Ordinal) || positional[0].StartsWith("@", StringComparison.Ordinal))
                     return Failed(verb, "call needs a tool name, e.g. call acad_status.");
                 if (positional.Count > 2)
                     return Failed(verb, "Pass the arguments as one JSON object. From Windows PowerShell, put it in a file and pass @file.");
@@ -89,7 +89,7 @@ public static class BridgeCli
                     Tool = positional[0],
                     TimeoutSeconds = timeout,
                     ArgumentsFromStdin = source == "-",
-                    ArgumentsFile = source is { Length: > 1 } && source[0] == '@' ? source[1..] : null,
+                    ArgumentsFile = source is { Length: > 1 } && source[0] == '@' ? source.Substring(1) : null,
                     Arguments = source is null || source == "-" || source[0] == '@' ? null : source,
                     Error = source == "@" ? "@ needs a file path, e.g. @args.json." : null,
                 };
@@ -107,8 +107,8 @@ public static class BridgeCli
     {
         var text = description.ReplaceLineEndings(" ").Trim();
         var end = text.IndexOf(". ", StringComparison.Ordinal);
-        if (end >= 0) text = text[..(end + 1)];
-        return text.Length <= maxLength ? text : text[..(maxLength - 3)].TrimEnd() + "...";
+        if (end >= 0) text = text.Substring(0, end + 1);
+        return text.Length <= maxLength ? text : text.Substring(0, maxLength - 3).TrimEnd() + "...";
     }
 
     private static BridgeCommand Failed(string verb, string error) => new() { Verb = verb, Error = error };

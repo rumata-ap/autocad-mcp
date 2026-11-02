@@ -35,6 +35,7 @@ param(
     [switch]$Package,
     [string]$FromDir,
     [string]$Configuration = 'Release',
+    [string]$AcadVersion = '2020',
     [string]$DotnetPath
 )
 
@@ -46,7 +47,20 @@ $serverProj  = Join-Path $root 'src\Nodal.AcadMcp.Server\Nodal.AcadMcp.Server.cs
 $bundleName  = 'Nodal.AcadMcp.bundle'
 $bundleRoot  = Join-Path $env:APPDATA "Autodesk\ApplicationPlugins\$bundleName"
 $serverRoot  = Join-Path $env:LOCALAPPDATA 'Nodal.AcadMcp\server'
-$tfmAddin    = 'net10.0-windows'
+
+# The autoloader matches on the AutoCAD release series, and the add-in must be built for the
+# CLR that release hosts: 2027 = R26.0/.NET 10, 2020 = R23.1/.NET Framework 4.8.
+$acadProfiles = @{
+    '2020' = @{ SeriesMin = 'R23.0'; SeriesMax = 'R23.1'; Platform = 'AutoCAD*'; Tfm = 'net48' }
+    '2027' = @{ SeriesMin = 'R26.0'; SeriesMax = 'R26.0'; Platform = 'AutoCAD*|ADT'; Tfm = 'net10.0-windows' }
+}
+if (-not $acadProfiles.ContainsKey($AcadVersion)) {
+    throw "AcadVersion '$AcadVersion' is not mapped here. Known: $($acadProfiles.Keys -join ', ')."
+}
+$acadSeriesMin = $acadProfiles[$AcadVersion].SeriesMin
+$acadSeriesMax = $acadProfiles[$AcadVersion].SeriesMax
+$acadPlatform  = $acadProfiles[$AcadVersion].Platform
+$tfmAddin      = $acadProfiles[$AcadVersion].Tfm
 
 # ---------------------------------------------------------------- locate the SDK
 # PATH first, so this works on a machine that is not the author's. A user-local SDK
@@ -96,8 +110,8 @@ Write-Host "Using SDK: $dotnet" -ForegroundColor DarkGray
 
 # ---------------------------------------------------------------- build
 if (-not $NoBuild) {
-    Write-Host "Building add-in ($Configuration)..." -ForegroundColor Cyan
-    & $dotnet build $addinProj -c $Configuration -v quiet --nologo
+    Write-Host "Building add-in for AutoCAD $AcadVersion ($Configuration)..." -ForegroundColor Cyan
+    & $dotnet build $addinProj -c $Configuration -v quiet --nologo -p:AcadVersion=$AcadVersion
     if ($LASTEXITCODE -ne 0) { throw "Add-in build failed with exit code $LASTEXITCODE." }
 
     Write-Host "Publishing MCP server ($Configuration)..." -ForegroundColor Cyan
@@ -130,19 +144,20 @@ Write-Host "Add-in  -> $contentsAbs" -ForegroundColor Green
 if (-not $NoBuild) { Write-Host "Server  -> $serverRoot" -ForegroundColor Green }
 
 # ---------------------------------------------------------------- manifest
-# SeriesMin/Max R26.0 == AutoCAD 2027. ADT covers AutoCAD Architecture.
+# SeriesMin/Max is the AutoCAD release series the autoloader accepts (R23.1 == AutoCAD 2020,
+# R26.0 == AutoCAD 2027). ADT covers AutoCAD Architecture.
 $manifest = @"
 <?xml version="1.0" encoding="utf-8"?>
 <ApplicationPackage
   SchemaVersion="1.0"
-  AppVersion="$stamp"
+  AppVersion="0.3.0"
   Author="Ed Foster"
   Name="Nodal AcadMcp"
   ProductCode="{7E2C9A14-6B3D-4F58-9C21-0A5E4D8B7F36}"
   UpgradeCode="{2B8F41D7-5C6A-4E39-BD02-9F7A3C1E6D84}"
   Description="Nodal MCP bridge for AutoCAD and AutoCAD Architecture">
   <CompanyDetails Name="Nodal" Url="https://github.com/ed-fos/autocad-mcp" Email="" />
-  <RuntimeRequirements Platform="AutoCAD|ADT" SeriesMin="R26.0" SeriesMax="R26.0"
+  <RuntimeRequirements Platform="$acadPlatform" SeriesMin="$acadSeriesMin" SeriesMax="$acadSeriesMax"
                        OS="Win64" SupportPath="./$contentsRel" />
   <Components>
     <!-- No AppType attribute: "ManagedDotNet" is not a valid value and makes the autoloader
@@ -216,7 +231,7 @@ if ($Package) {
               (Join-Path $root 'NOTICE'), (Join-Path $root 'SECURITY.md'),
               (Join-Path $root 'CHANGELOG.md') -Destination $stage -Force
 
-    $zip = Join-Path $distDir "Nodal.AcadMcp-acad2027-$stamp.zip"
+    $zip = Join-Path $distDir "Nodal.AcadMcp-acad$AcadVersion-$stamp.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }
 
     # The entry paths are built by hand, on purpose. The ZIP format requires '/' as the path

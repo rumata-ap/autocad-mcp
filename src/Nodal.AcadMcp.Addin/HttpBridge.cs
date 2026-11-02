@@ -87,7 +87,7 @@ internal static class HttpBridge
 
         _listener = listener;
         Port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        _token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        _token = NetCompat.ToHexString(NetCompat.RandomBytes(32));
         _cts = new CancellationTokenSource();
 
         try
@@ -118,7 +118,7 @@ internal static class HttpBridge
         Port = 0;
         _token = string.Empty;
 
-        try { File.Delete(AcadMcpProtocol.InstanceFile(Environment.ProcessId)); } catch { }
+        try { File.Delete(AcadMcpProtocol.InstanceFile(NetCompat.ProcessId)); } catch { }
     }
 
     // ------------------------------------------------------------------ instance discovery
@@ -135,7 +135,7 @@ internal static class HttpBridge
 
         var descriptor = new InstanceDescriptor
         {
-            Pid = Environment.ProcessId,
+            Pid = NetCompat.ProcessId,
             Port = Port,
             Token = _token,
             StartedUtc = DateTime.UtcNow.ToString("o"),
@@ -154,7 +154,7 @@ internal static class HttpBridge
         foreach (var file in Directory.EnumerateFiles(dir, "*.json"))
         {
             if (!int.TryParse(Path.GetFileNameWithoutExtension(file), out var pid)) continue;
-            if (pid == Environment.ProcessId) continue;
+            if (pid == NetCompat.ProcessId) continue;
 
             var alive = true;
             try { using var _ = Process.GetProcessById(pid); }
@@ -225,7 +225,7 @@ internal static class HttpBridge
             try
             {
                 client.NoDelay = true;
-                await using var stream = client.GetStream();
+                using var stream = client.GetStream();
 
                 var head = await ReadHeadAsync(stream, ct).ConfigureAwait(false);
                 if (head is null) return;
@@ -268,7 +268,7 @@ internal static class HttpBridge
             {
                 alive = true,
                 port = Port,
-                pid = Environment.ProcessId,
+                pid = NetCompat.ProcessId,
                 document = SafeDocumentName(),
             });
 

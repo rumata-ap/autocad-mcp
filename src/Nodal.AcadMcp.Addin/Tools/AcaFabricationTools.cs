@@ -80,7 +80,7 @@ internal static class AcaFabricationTools
                 var copy = operand.Body.Copy(); copy.Transform(operand.GeoEcs);
                 body = body.BooleanOperation(copy, operation);
             }
-            if (!double.IsFinite(body.Volume) || body.Volume <= 1e-9) throw new AcadMcpException("empty_result", "The boolean result has no positive solid volume.");
+            if (!NetCompat.IsFinite(body.Volume) || body.Volume <= 1e-9) throw new AcadMcpException("empty_result", "The boolean result has no positive solid volume.");
             target.ChangeTo(AB.ShapeType.BoundaryRepresentation);
             body.Transform(target.GeoEcs.Inverse()); target.SetBody(body, false);
             if (Args.BoolOpt(args, "eraseOperands", false)) foreach (var operand in operands) { operand.UpgradeOpen(); operand.Erase(); }
@@ -146,7 +146,7 @@ internal static class AcaFabricationTools
             var detail = Enum.GetValues<AS.DetailLevel>().Last();
             var extents = component.StartNode.Extents(detail);
             var reach = Math.Max(Math.Abs(extents.MinPoint.X), Math.Abs(extents.MaxPoint.X));
-            if (!double.IsFinite(reach) || reach <= 0) throw new AcadMcpException("invalid_profile", "Profile has no finite lateral extent.");
+            if (!NetCompat.IsFinite(reach) || reach <= 0) throw new AcadMcpException("invalid_profile", "Profile has no finite lateral extent.");
             var points = args.GetProperty("points").EnumerateArray().Select(WorkflowSupport.Point).ToArray();
             if (points.Any(p => Math.Abs(p.Z - points[0].Z) > 1e-8) || points[0].DistanceTo(points[^1]) < 1e-8)
                 throw new AcadMcpException("bad_argument", "Use an open path whose points share the same Z elevation.");

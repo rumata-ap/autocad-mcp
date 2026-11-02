@@ -27,7 +27,7 @@ public static class HttpRequestGuard
         path = string.Empty;
         headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        var lines = headerText.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+        var lines = headerText.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
         if (lines.Length == 0) return false;
 
         var parts = lines[0].Split(' ');
@@ -44,7 +44,7 @@ public static class HttpRequestGuard
 
             // Last value wins, which matches how a duplicated header would be treated
             // downstream; what matters is that a smuggled second Host cannot be ignored.
-            headers[line[..colon].Trim()] = line[(colon + 1)..].Trim();
+            headers[line.Substring(0, colon).Trim()] = line.Substring(colon + 1).Trim();
         }
 
         return true;
@@ -152,7 +152,7 @@ public static class HttpRequestGuard
     {
         var x = Encoding.UTF8.GetBytes(a);
         var y = Encoding.UTF8.GetBytes(b);
-        return x.Length == y.Length && CryptographicOperations.FixedTimeEquals(x, y);
+        return NetCompat.FixedTimeEquals(x, y);
     }
 }
 

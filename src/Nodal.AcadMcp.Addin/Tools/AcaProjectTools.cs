@@ -25,7 +25,7 @@ internal static class AcaProjectTools
             System.Text.RegularExpressions.Regex.IsMatch(name, "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
             throw new AcadMcpException("bad_argument", "name must be a simple file stem without dots, trailing spaces or path separators (maximum 120 characters).");
         var expectedProject = Args.Str(args, "expectedProject");
-        if (!Path.IsPathFullyQualified(expectedProject) || !string.Equals(Path.GetExtension(expectedProject), ".apj", StringComparison.OrdinalIgnoreCase) || !File.Exists(expectedProject))
+        if (!NetCompat.IsPathFullyQualified(expectedProject) || !string.Equals(Path.GetExtension(expectedProject), ".apj", StringComparison.OrdinalIgnoreCase) || !File.Exists(expectedProject))
             throw new AcadMcpException("bad_argument", "expectedProject must name an existing APJ by its full path.");
         using var pointer = new Autodesk.Aec.Project.ProjectPointer(expectedProject, OpenMode.ForWrite, false);
         pointer.SaveOnClose = false;

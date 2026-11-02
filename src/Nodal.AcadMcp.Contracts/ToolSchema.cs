@@ -42,7 +42,7 @@ public static class ToolSchema
             "object" => value.ValueKind == JsonValueKind.Object,
             "array" => value.ValueKind == JsonValueKind.Array,
             "string" => value.ValueKind == JsonValueKind.String,
-            "number" => value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var n) && double.IsFinite(n),
+            "number" => value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var n) && NetCompat.IsFinite(n),
             "integer" => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out _),
             "boolean" => value.ValueKind is JsonValueKind.True or JsonValueKind.False,
             _ => true

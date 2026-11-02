@@ -77,8 +77,8 @@ internal static class WorkflowTools
                 units = readback.Insunits.ToString();
             }
             string hash; long bytes;
-            using (var stream = File.OpenRead(temp)) { hash = Convert.ToHexString(SHA256.HashData(stream)); bytes = stream.Length; }
-            File.Move(temp, path, false);
+            using (var stream = File.OpenRead(temp)) { hash = NetCompat.ToHexString(NetCompat.Sha256(stream)); bytes = stream.Length; }
+            File.Move(temp, path);
             return new
             {
                 path,
@@ -163,7 +163,7 @@ internal static class WorkflowTools
             }
             else ed.Command("_.PNGOUT", temp, ""); // Enter at "Select objects" exports everything shown
             if (!File.Exists(temp) || new FileInfo(temp).Length < 24) throw new AcadMcpException("export_failed", "PNGOUT did not produce an image.");
-            File.Move(temp, path, false);
+            File.Move(temp, path);
             var bytes = File.ReadAllBytes(path);
             var attach = inline && bytes.Length <= PlotTools.MaxInlineBytes;
             return new
@@ -267,8 +267,8 @@ internal static class WorkflowTools
                 WorkflowSupport.RequireModelEntity(entity);
                 var info = NativeInfo(ctx, entity);
                 rows.Add(new { handle = h, type = entity.GetType().FullName, entity.Layer, bounds = WorkflowSupport.Bounds(entity.GeometricExtents), info.Style, info.Volume });
-                byType[entity.GetType().Name] = byType.GetValueOrDefault(entity.GetType().Name) + 1;
-                byLayer[entity.Layer] = byLayer.GetValueOrDefault(entity.Layer) + 1;
+                byType[entity.GetType().Name] = NetCompat.GetValueOrDefault(byType, entity.GetType().Name) + 1;
+                byLayer[entity.Layer] = NetCompat.GetValueOrDefault(byLayer, entity.Layer) + 1;
                 if (inventory) continue; // nothing was asked of it, so nothing passes or fails
                 Check(h + ".exists", true, "Entity found.");
                 if (request is not { } expect) continue;

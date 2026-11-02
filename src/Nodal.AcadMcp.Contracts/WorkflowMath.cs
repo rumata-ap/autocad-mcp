@@ -9,7 +9,7 @@ public static class WorkflowMath
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream)) WriteCanonical(writer, args);
-        return Convert.ToHexString(SHA256.HashData(stream.ToArray()));
+        return NetCompat.ToHexString(NetCompat.Sha256(stream.ToArray()));
     }
     private static void WriteCanonical(Utf8JsonWriter w, JsonElement e)
     {
@@ -21,7 +21,7 @@ public static class WorkflowMath
     public static (double Forward, double Left) MiterNormal(double ax, double ay, double bx, double by)
     {
         var al = Math.Sqrt(ax * ax + ay * ay); var bl = Math.Sqrt(bx * bx + by * by);
-        if (!double.IsFinite(al + bl) || al < 1e-9 || bl < 1e-9) throw new ArgumentException("Segments must have nonzero finite length.");
+        if (!NetCompat.IsFinite(al + bl) || al < 1e-9 || bl < 1e-9) throw new ArgumentException("Segments must have nonzero finite length.");
         ax /= al; ay /= al; bx /= bl; by /= bl;
         var nx = ax + bx; var ny = ay + by;
         var forward = nx * bx + ny * by; var left = -nx * by + ny * bx;

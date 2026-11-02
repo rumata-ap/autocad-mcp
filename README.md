@@ -319,10 +319,30 @@ through `run_csharp` (annotative objects, viewports, title blocks, plotting), se
 
 ## Supported versions
 
-AutoCAD 2027 only, and this is a hard gate in three places at once: the `net10.0-windows`
-target framework, the `AutoCAD.NET` 26.0.0 package, and `SeriesMin/Max="R26.0"` in the bundle
-manifest. AutoCAD 2026 and earlier run on .NET 8, so supporting them is a retarget rather than
-a version bump.
+Upstream supports AutoCAD 2027 only, and that is a hard gate in three places at once: the
+`net10.0-windows` target framework, the `AutoCAD.NET` 26.0.0 package, and
+`SeriesMin/Max="R26.0"` in the bundle manifest.
+
+**This fork adds AutoCAD 2020 (R23.1).** It is a retarget, not a version bump: AutoCAD 2020
+hosts .NET Framework 4.8, so the add-in builds for `net48` against `AutoCAD.NET` 23.1.0 while
+the MCP server stays on .NET 10 (it runs out of process and is unchanged).
+
+What that costs:
+
+- **AutoCAD Architecture tools** are compiled out unless ACA is installed (`ACA\AecBaseMgd.dll`
+  beside `acad.exe`). A vanilla AutoCAD 2020 build keeps the plain-AutoCAD tools.
+- **`run_csharp`** is compiled out too, because AutoCAD 2020 ships no Roslyn. Shipping your own
+  `Microsoft.CodeAnalysis` would re-enable it.
+- **Assembly binding**: `acad.exe.config` has no redirects, so the shipped shims are resolved by
+  `AssemblyResolution.cs` at startup. Without it `Initialize` dies in `System.Text.Json`.
+
+Select the version with `AcadVersion`, which maps to the package, the target framework and the
+manifest series in one place:
+
+```bash
+powershell -ExecutionPolicy Bypass -File deploy.ps1 -AcadVersion 2020   # R23.1, net48
+powershell -ExecutionPolicy Bypass -File deploy.ps1 -AcadVersion 2027   # R26.0, net10.0-windows
+```
 
 `AcadVersion` and `AcadNetPackageVersion` in `Directory.Build.props` are the two knobs; the
 build fails loudly rather than silently resolving the wrong package if you set an unmapped

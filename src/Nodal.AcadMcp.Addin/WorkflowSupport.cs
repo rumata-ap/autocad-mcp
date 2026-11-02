@@ -23,7 +23,7 @@ internal static class WorkflowSupport
             return;
         }
         var expected = Args.Str(args, "expectedDocument");
-        if (!doc.IsNamedDrawing || !Path.IsPathFullyQualified(expected) ||
+        if (!doc.IsNamedDrawing || !NetCompat.IsPathFullyQualified(expected) ||
             !string.Equals(Path.GetFullPath(expected), Path.GetFullPath(doc.Database.Filename), StringComparison.OrdinalIgnoreCase))
             throw new AcadMcpException("wrong_document", "expectedDocument must be the active drawing's full saved path.");
         if (checkBusy && !string.IsNullOrEmpty(doc.CommandInProgress))
@@ -91,7 +91,7 @@ internal static class WorkflowSupport
     internal static string NewFile(JsonElement args, string extension)
     {
         var path = Args.Str(args, "path");
-        if (!Path.IsPathFullyQualified(path) || !string.Equals(Path.GetExtension(path), extension, StringComparison.OrdinalIgnoreCase))
+        if (!NetCompat.IsPathFullyQualified(path) || !string.Equals(Path.GetExtension(path), extension, StringComparison.OrdinalIgnoreCase))
             throw new AcadMcpException("bad_argument", $"path must be a full {extension} file path.");
         path = Path.GetFullPath(path);
         if (File.Exists(path)) throw new AcadMcpException("already_exists", "The output file already exists; choose a new path.");

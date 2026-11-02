@@ -109,7 +109,7 @@ public static class PdfRaster
                 Check(Slot<NoArgs>(renderOp, 8)(renderOp), "render the page");                                    // GetResults
 
                 var iidOut = IidOutputStream;
-                Check(Marshal.QueryInterface(output, in iidOut, out var outStream), "flush the image");
+                Check(NetCompat.QueryInterface(output, iidOut, out var outStream), "flush the image");
                 try
                 {
                     Check(Slot<PtrOut>(outStream, 7)(outStream, out var flushOp), "flush the image");          // FlushAsync
@@ -150,7 +150,7 @@ public static class PdfRaster
             Check(RoActivateInstance(name, out var inspectable), $"create {className}");
             try
             {
-                Check(Marshal.QueryInterface(inspectable, in iid, out var typed), $"use {className}");
+                Check(NetCompat.QueryInterface(inspectable, iid, out var typed), $"use {className}");
                 return typed;
             }
             finally { Marshal.Release(inspectable); }
@@ -168,7 +168,7 @@ public static class PdfRaster
     private static void Await(IntPtr async, DateTime deadline, string what)
     {
         var iid = IidAsyncInfo;
-        Check(Marshal.QueryInterface(async, in iid, out var info), what);
+        Check(NetCompat.QueryInterface(async, iid, out var info), what);
         try
         {
             var status = AsyncStarted;

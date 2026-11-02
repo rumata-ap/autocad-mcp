@@ -58,8 +58,8 @@ public static class SheetMath
         if (sep < 0) sep = s.IndexOf('=');
         if (sep >= 0)
         {
-            var paper = ParseLength(s[..sep], text);
-            var drawing = ParseLength(s[(sep + 1)..], text);
+            var paper = ParseLength(s.Substring(0, sep), text);
+            var drawing = ParseLength(s.Substring(sep + 1), text);
             return Checked(new ScaleRatio(paper, drawing), text);
         }
 
@@ -69,7 +69,7 @@ public static class SheetMath
 
     private static ScaleRatio Checked(ScaleRatio r, string text)
     {
-        if (!(r.Paper > 0) || !(r.Drawing > 0) || !double.IsFinite(r.Factor) || r.Factor <= 0)
+        if (!(r.Paper > 0) || !(r.Drawing > 0) || !NetCompat.IsFinite(r.Factor) || r.Factor <= 0)
             throw new ArgumentException($"Scale '{text}' must have two positive sides.");
         return r;
     }
@@ -84,13 +84,13 @@ public static class SheetMath
         var foot = s.IndexOf('\'');
         if (foot >= 0)
         {
-            feet = ParseNumber(s[..foot]) ?? throw Bad(context ?? part);
-            s = s[(foot + 1)..].Trim();
-            if (s.StartsWith('-')) s = s[1..].Trim();
+            feet = ParseNumber(s.Substring(0, foot)) ?? throw Bad(context ?? part);
+            s = s.Substring(foot + 1).Trim();
+            if (s.StartsWith("-", StringComparison.Ordinal)) s = s.Substring(1).Trim();
         }
 
-        if (s.EndsWith('"')) s = s[..^1].Trim();
-        else if (s.Contains('"')) throw Bad(context ?? part);
+        if (s.EndsWith("\"", StringComparison.Ordinal)) s = s.Substring(0, s.Length - 1).Trim();
+        else if (s.Contains("\"")) throw Bad(context ?? part);
 
         var inches = s.Length == 0 ? 0 : ParseNumber(s) ?? throw Bad(context ?? part);
         if (feet < 0 || inches < 0) throw Bad(context ?? part);
@@ -105,7 +105,7 @@ public static class SheetMath
     {
         var s = text.Trim();
         if (double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var d))
-            return double.IsFinite(d) ? d : null;
+            return NetCompat.IsFinite(d) ? d : null;
 
         var m = Mixed.Match(s);
         if (m.Success)

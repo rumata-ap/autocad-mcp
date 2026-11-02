@@ -132,7 +132,7 @@ public static class AnnotationSizing
         var colon = text.IndexOf(':');
         if (colon > 0)
         {
-            if (TryNumber(text[..colon], out var plotted) && TryNumber(text[(colon + 1)..], out var drawing)
+            if (TryNumber(text.Substring(0, colon), out var plotted) && TryNumber(text.Substring(colon + 1), out var drawing)
                 && plotted > 0 && drawing > 0)
                 return drawing / plotted;
             return null;
@@ -141,11 +141,11 @@ public static class AnnotationSizing
     }
 
     private static bool TryNumber(string s, out double value) =>
-        double.TryParse(s.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
+        double.TryParse(s.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && NetCompat.IsFinite(value);
 
     private static bool SameFactor(double a, double b) => Math.Abs(a - b) <= 1e-9 * Math.Max(1.0, Math.Abs(b));
 
-    private static string Normalize(string s) => string.Join(' ', s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+    private static string Normalize(string s) => string.Join(" ", s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
     private static void RequirePositive(string name, double value)
     {

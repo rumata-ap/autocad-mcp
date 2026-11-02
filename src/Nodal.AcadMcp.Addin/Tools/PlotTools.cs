@@ -290,7 +290,7 @@ internal static class PlotTools
             if (!keepPdf) { try { File.Delete(pdf); } catch (Exception) { } }
         }
 
-        var bytes = await File.ReadAllBytesAsync(png).ConfigureAwait(false);
+        var bytes = await NetCompat.ReadAllBytesAsync(png).ConfigureAwait(false);
         var attach = inline && bytes.Length <= MaxInlineBytes;
         return new
         {
@@ -505,7 +505,7 @@ internal static class PlotTools
 
     private static string ExistingDirectory(string path, string arg)
     {
-        if (!Path.IsPathFullyQualified(path)) throw new AcadMcpException("bad_argument", $"{arg} must be a full path.");
+        if (!NetCompat.IsPathFullyQualified(path)) throw new AcadMcpException("bad_argument", $"{arg} must be a full path.");
         var full = Path.GetFullPath(path);
         if (!Directory.Exists(full)) throw new AcadMcpException("not_found", $"{arg} '{full}' does not exist.");
         return full;
@@ -513,7 +513,7 @@ internal static class PlotTools
 
     private static string OutputFile(string path, string extension, string arg, bool overwrite)
     {
-        if (!Path.IsPathFullyQualified(path) || !string.Equals(Path.GetExtension(path), extension, StringComparison.OrdinalIgnoreCase))
+        if (!NetCompat.IsPathFullyQualified(path) || !string.Equals(Path.GetExtension(path), extension, StringComparison.OrdinalIgnoreCase))
             throw new AcadMcpException("bad_argument", $"{arg} must be a full {extension} file path.");
         var full = Path.GetFullPath(path);
         if (!Directory.Exists(Path.GetDirectoryName(full))) throw new AcadMcpException("not_found", $"The folder for {arg} does not exist.");

@@ -312,7 +312,7 @@ internal static class EscapeTools
     /// </summary>
     private static async Task<object?> CancelCommand(JsonElement args)
     {
-        var timeout = Math.Clamp(Args.IntOpt(args, "timeoutMs", 5000), 250, 60_000);
+        var timeout = NetCompat.Clamp(Args.IntOpt(args, "timeoutMs", 5000), 250, 60_000);
 
         var (doc, before) = await MainThread.InvokeAsync(() =>
         {

@@ -233,7 +233,7 @@ internal static class DraftingTools
             throw new AcadMcpException("wrong_space", "The entity must be in the current space, where the command can pick it.");
     }
 
-    private static string Lisp(Point3d p) => string.Create(CultureInfo.InvariantCulture, $"(list {p.X:R} {p.Y:R} {p.Z:R})");
+    private static string Lisp(Point3d p) => FormattableString.Invariant($"(list {p.X:R} {p.Y:R} {p.Z:R})");
 
     /// <summary>Runs the command at the command line and returns the handle of what it created.</summary>
     private static async Task<string> RunCommand(string command, string inputs)
@@ -440,7 +440,7 @@ internal static class DraftingTools
     private static async Task<object?> ReadPdfPage(JsonElement a)
     {
         var path = Args.Str(a, "path");
-        if (!Path.IsPathFullyQualified(path) || !File.Exists(path))
+        if (!NetCompat.IsPathFullyQualified(path) || !File.Exists(path))
             throw new AcadMcpException("not_found", "path must be the full path of an existing PDF file.");
         var page = Args.IntOpt(a, "page", 1);
 
@@ -525,7 +525,7 @@ internal static class DraftingTools
         {
             if (id.Handle.Value < seed || tr.GetObject(id, OpenMode.ForRead) is not Entity e) continue;
             var type = e.GetType().Name;
-            counts[type] = counts.GetValueOrDefault(type) + 1;
+            counts[type] = NetCompat.GetValueOrDefault(counts, type) + 1;
             try { var box = e.GeometricExtents; if (extents is null) extents = box; else { var all = extents.Value; all.AddExtents(box); extents = all; } } catch (Exception) { }
             switch (e)
             {
@@ -545,7 +545,7 @@ internal static class DraftingTools
                     break;
             }
         }
-        var lettering = textCount == 0 && counts.GetValueOrDefault("Polyline") > 100
+        var lettering = textCount == 0 && NetCompat.GetValueOrDefault(counts, "Polyline") > 100
             ? "No text objects arrived, so the lettering on this page is linework (SHX fonts). Read printed values from a rendered image of the page, and take lengths and angles from these segments."
             : null;
         return new

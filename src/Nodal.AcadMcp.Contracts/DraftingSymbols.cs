@@ -34,7 +34,7 @@ public static class DraftingSymbols
     /// </summary>
     public static ProjectionSymbolGeometry ProjectionSymbol(bool firstAngle, double cx, double cy, double size)
     {
-        if (!(size > 0) || !double.IsFinite(size)) throw new ArgumentException("size must be a positive number.");
+        if (!(size > 0) || !NetCompat.IsFinite(size)) throw new ArgumentException("size must be a positive number.");
         double big = size, small = size / 2, length = size, gap = size / 2, overrun = size * 0.15;
         var x0 = cx - (length + gap + big) / 2;
         var x1 = x0 + length;
